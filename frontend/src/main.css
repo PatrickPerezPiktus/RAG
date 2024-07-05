@@ -1,0 +1,23 @@
+:root {
+  --logo-color: #6397b5;
+  --msg-background: #2e334300;
+  --main-background: #2b2b2b;
+  --input-background: #dadada;
+  --btn-background-color: #6397b5;
+  --btn-color: #f1f1f1;
+  --btn-hover-background-color: #6397b5;
+  --msg-background: #2e334300;
+  --msg-dark-background: #4250579f;
+  --spinner-border:#6397b5;
+  --sidebar-elm-background-color: #a7b5b65e;
+  --sidebar-background: #1f1f1f;
+  color: #f1f1f1;
+  --color: #a7a7a7;
+  --color-input: #f1f1f1;
+  --color-hover: #6397b5;
+  --warn: #d61e1e;
+}
+
+body {
+  background: var(--main-background);
+}
