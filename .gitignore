@@ -3,4 +3,4 @@ env/
 rag-poc/__pycache__/
 rag-poc/routers/__pycache__/
 rag-poc/.env
-rag-poc/raw_data/
+rag-poc/_raw_data/

@@ -117,6 +117,11 @@ export default {
 </script>
 
 <style scoped>
+.config {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .paramWrapper {
   display: flex;
   flex-direction: row;
@@ -157,11 +162,4 @@ form {
   width: 100%;
   padding: 0 .2em;
 }
-
-@media screen and (min-width: 1200px) {
-  .param {
-    width: 66%;
-  }
-}
-
 </style>

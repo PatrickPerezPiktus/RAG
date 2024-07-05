@@ -11,13 +11,15 @@
   --spinner-border:#6397b5;
   --sidebar-elm-background-color: #a7b5b65e;
   --sidebar-background: #1f1f1f;
-  color: #f1f1f1;
   --color: #a7a7a7;
   --color-input: #f1f1f1;
   --color-hover: #6397b5;
   --warn: #d61e1e;
+  color: #f1f1f1;
 }
-
-body {
-  background: var(--main-background);
+.light {
+  --sidebar-background: #d6d6d6;
+  --main-background: #c4c4c4;
+  color: black;
+  --color: #303030;
 }

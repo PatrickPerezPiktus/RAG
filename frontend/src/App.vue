@@ -1,7 +1,11 @@
 <template>
   <div class="header">
-    <div class="logo" @click="menu = !menu">🦝 RAG-Chat</div>
+    <div class="logo" @click="menu = !menu; ">🦝 RAG</div>
     <User />
+    <div class="theme-btn">
+      <font-awesome-icon :icon="['fas', 'moon']" v-if="!thema" @click="this.toogleTheme()"  />
+      <font-awesome-icon :icon="['fas', 'sun']" v-if="thema" @click="this.toogleTheme()"  />
+    </div>
   </div>
   <div class='app'>
     <SideBar v-if="menu" />
@@ -39,7 +43,8 @@ export default {
   data: () => ({
     activePage: "info",
     spinning: false,
-    menu: true
+    menu: true,
+    thema: false
   }),
 
   created() {
@@ -54,6 +59,24 @@ export default {
     
     changePage(page) {
       this.activePage = page;
+    },
+
+    toogleTheme() {
+      this.thema = !this.thema;
+      let lightElements = document.getElementsByClassName("light");
+      let darkElements = document.getElementsByClassName("dark");
+
+      if (lightElements.length > 0) {
+        for (let i = 0; i < lightElements.length; i++) {
+          lightElements[i].classList.add('dark');
+          lightElements[i].classList.remove('light');
+        }
+      } else {
+        for (let i = 0; i < darkElements.length; i++) {
+          darkElements[i].classList.add('light');
+          darkElements[i].classList.remove('dark');
+        }
+      }
     }
   }
 };
@@ -88,10 +111,12 @@ body {
   color: var(--logo-color);
   border-radius: 10px;
   margin: 0.5em;
+  cursor: pointer;
 }
 
 .app {
   display: flex;
+  background: var(--main-background);
 }
 
 .content {
@@ -103,5 +128,9 @@ body {
 
 svg:hover {
   color: var(--color-hover);
+}
+
+.theme-btn {
+  margin: 0 .5em 0 0;
 }
 </style>

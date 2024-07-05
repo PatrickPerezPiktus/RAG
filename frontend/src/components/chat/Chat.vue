@@ -4,8 +4,14 @@
         <div v-for='message in this.activeChat' :class="['message', message.author]" :key="message.id">
           <div class="text">{{ message.message }} </div>
           <div v-if="message.sources" class="sources">
-            <div class="source-text"> Quellen:</div>
-            <div class="source" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }}</div>
+            <div class="source-wrapper">
+              <div class="source-text" @click="message.showSources = !message.showSources"> 
+                Quellen &nbsp;
+                <font-awesome-icon :icon="['fas', 'minus']" v-if="message.showSources"/>
+                <font-awesome-icon :icon="['fas', 'plus']" v-if="!message.showSources"/>
+              </div>
+              <div class="source" v-if="message.showSources" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }}</div>
+            </div>
             <ChunkRow v-if="message.showChunk" @click="message.showChunk = false" :chunkID="message.chunk?.chunkID" :content="message.chunk?.content"/>
           </div>
           <div v-if="message.loading"><Loading/></div>
@@ -111,9 +117,23 @@ export default {
   margin-bottom: 0.5em;
 }
 
-.source-text {
-  color: grey;
+.sources {
+  font-size: 14px;
+  display: flex;
+  border-top: 2px solid;
   margin-top: 1em;
+}
+
+.source-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.source-text {
+  color: var(--color);
+  margin-top: 1em;
+  display: flex;
+  flex-direction: row;
 }
 
 .source:hover {
@@ -121,8 +141,15 @@ export default {
   cursor: pointer;
 }
 
-.sources {
-  font-size: 14px;
+.chunk-row {
+  padding: .25em;
+  padding-left: 7em;
+  text-align: justify;
+  border: none;
+}
+
+.hl {
+  font-size: 20px;
 }
 
 @media (min-width: 1024px) {

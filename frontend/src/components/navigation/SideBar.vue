@@ -1,44 +1,43 @@
 <template>
   <div class="side-bar">
-    <div class="elements-wrapper">
-      <div>
-        <div class="menu">
-          
-          <div class="side-bar-elm" @click="changePage('config')">
-            <div class="text"><font-awesome-icon :icon="['fas', 'gear']"  /> Einstellungen</div>
-          </div>
-          
-          <div class="side-bar-elm" @click="changePage('documents')">
-            <div class="text"><font-awesome-icon :icon="['fas', 'database']"  /> Daten</div>
-          </div>
-          
-          <div class="side-bar-elm" @click="changePage('info')">
-            <div class="text"><font-awesome-icon :icon="['fas', 'info']"  /> Info</div>
-          </div>
-          
-          <div class="side-bar-elm" @click="openChat(0)">
-            <div class="text"><font-awesome-icon :icon="['fas', 'comment']"  /> neuer Chat</div>
-          </div>
-          <hr>
+    <div class="menu">
+      
+      <div class="side-bar-elm" @click="changePage('config')">
+        <div class="text"><font-awesome-icon :icon="['fas', 'gear']"  /> Einstellungen</div>
+      </div>
+      
+      <div class="side-bar-elm" @click="changePage('documents')">
+        <div class="text"><font-awesome-icon :icon="['fas', 'database']"  /> Daten</div>
+      </div>
+      
+      <div class="side-bar-elm" @click="changePage('info')">
+        <div class="text"><font-awesome-icon :icon="['fas', 'info']"  /> Info</div>
+      </div>
+      
+      <div class="side-bar-elm" @click="openChat(0)">
+        <div class="text"><font-awesome-icon :icon="['fas', 'comment']"  /> neuer Chat</div>
+      </div>
+      <hr>
+    </div>
+    <div class="chats">
+    <div v-for='chat in this.chats' class="side-bar-elm" @click="openChat(chat)">
+        <div v-if='!chat.showInput' class="elm-content text">{{ chat.name }} </div>
+        <div class="elm-content" v-if='!chat.showInput' @click="chat.showInput = !chat.showInput">
+          <font-awesome-icon :icon="['fas', 'bars']" />
         </div>
-        <div class="chats">
-        <div v-for='chat in this.chats' class="side-bar-elm" @click="openChat(chat)">
-            <div v-if='!chat.showInput' class="elm-content text">{{ chat.name }} </div>
-            <div class="elm-content" v-if='!chat.showInput' @click="chat.showInput = !chat.showInput">
-              <font-awesome-icon :icon="['fas', 'bars']" />
-            </div>
-            <input class="elm-content" v-if='chat.showInput' v-model="chat.name" />
-            <div class="elm-content" v-if='chat.showInput'
-                  @click="renameChat(chat); chat.showInput = !chat.showInput">
-              <font-awesome-icon :icon="['fas', 'pen']" />
-            </div>
-            <div class="elm-content" v-if='chat.showInput' @click="deleteChat(chat)">
-              <font-awesome-icon :icon="['fas', 'trash']" />
-            </div>
-          </div>
-          
+        <input class="elm-content" v-if='chat.showInput' v-model="chat.name" />
+        <div class="elm-content" v-if='chat.showInput'
+              @click="renameChat(chat); chat.showInput = !chat.showInput">
+          <font-awesome-icon :icon="['fas', 'pen']" />
+        </div>
+        <div class="elm-content delete" v-if='chat.showInput' @click="deleteChat(chat)">
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </div>
+        <div class="elm-content" v-if='chat.showInput' @click="chat.showInput = !chat.showInput">
+          <font-awesome-icon :icon="['fas', 'x']" />
         </div>
       </div>
+      
     </div>
   </div>
 </template>
@@ -52,14 +51,15 @@ export default {
   computed: {
     ...mapGetters(['chats', 'user', 'activeChat', 'chatID'])
   },
-  created() {
-    EventBus.on('loadChats', this.getChats);
-  },
   data() {
     return {
       name: '',
       showInput: false,
     };
+  },
+
+  created() {
+    EventBus.on('getChats', this.getChats);
   },
 
   methods: {
@@ -164,22 +164,22 @@ export default {
   padding-top: .5em;
 }
 
-.elements-wrapper {
+.side-bar {
   height: 95vh;
   overflow-y: auto;
+  background: var(--sidebar-background);
+  width: 300px;
+  border-right: 1px solid;
 }
-
+@media screen and (max-width: 600px) {
+  .side-bar {
+    min-width: 100%;
+  }
+}
 .side-bar-elm {
   padding: 1em;
   border-radius: 10px;
   margin: 0 0.5em;
-}
-
-.side-bar {
-  background: var(--sidebar-background);
-  width: 280px;
-  height: 95vh;
-  border-right: 1px solid;
 }
 
 button, label {
@@ -229,5 +229,13 @@ input {
 .text {
   width: 100%;
   overflow: hidden;
+}
+
+.delete {
+  margin: 0;
+}
+
+.delete svg:hover {
+  color: var(--warn);
 }
 </style>

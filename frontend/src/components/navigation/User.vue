@@ -1,14 +1,14 @@
 <template>
   <div class="user-elm">
-    <div class="user-info" @click="showBtn = !showBtn">
-      <font-awesome-icon :icon="['fas', 'user']"  />
-      <div ref="user"> &nbsp; {{this.user?.name}} </div>
-    </div>
     <div v-if="showBtn" @click="logout">
       <font-awesome-icon :icon="['fas', 'right-from-bracket']"  />
     </div>
     <div v-if="showBtn" class="delete" @click="deleteUser">
       <font-awesome-icon :icon="['fas', 'trash']"  />
+    </div>
+    <div class="user-info" @click="showBtn = !showBtn">
+      <div ref="user"> &nbsp; {{this.user?.name}} &nbsp; </div>
+      <font-awesome-icon :icon="['fas', 'user']"  />
     </div>
   </div>
 
@@ -54,7 +54,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['setUser']),  
+    ...mapActions(['addLog','setUser']),  
 
     async createUser() {
       try {
@@ -119,6 +119,7 @@ export default {
       
         EventBus.emit('loadChats');
         this.show = false;
+        EventBus.emit('getChats');
       } catch (err) {
         this.setUser({'id': '', 'name': '', 'pw': ''});
         console.log('Fehler beim laden eines Nutzers: ', err);
