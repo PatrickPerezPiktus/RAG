@@ -7,33 +7,38 @@
 
 <script>
 import EventBus from '../../eventBus.js';
-import axios from 'axios';
+import axios from '@/axios';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
   computed: {
     ...mapGetters(['user', 'activeChat', 'chatID', 'chats', 'chatID'])
   },
+
   data() {
     return {
       input: '',
       onSend: false
     };
   },
+
   methods: {
-    ...mapActions(['setChatID', 'addChat', 'addActiveChat', 'addMessage', 'addSource']),  
+    ...mapActions(['addLog', 'setChatID', 'addChat', 'addActiveChat', 'addMessage', 'addSource']),  
+
     async sendQuery() {
-      if (this.onSend) { console.debug("es wird auf eine Antwort des Servers gewartet"); return; }
+      if (this.onSend) { 
+        console.log("Es wird auf eine Antwort des Servers gewartet");
+        this.addLog({author: "QueryInput", text: "Es wird auf eine Antwort des Servers gewartet"});
+        return;
+       }
 
       EventBus.emit('toggle-spinner');
-
       this.addActiveChat({
         id: this.activeChat.length + 1,
         author: "user",
         message: this.input,
         loading: false
       });
-
       this.addActiveChat({
         id: this.activeChat.length + 1,
         author: "system",
@@ -41,18 +46,22 @@ export default {
         loading: true
       });
       this.onSend = true;
+
       try {
-        const response = await axios.post('http://localhost:9000/chat', {
+        const response = await axios.post('/chat', {
           chatID: this.chatID,
           userID: this.user.id,
           message: this.input
         });
-        if (this.chatID > 0)  {   
-          console.debug(response);     
+        console.log("Antwort des RAG-Systems: ",  response);
+        this.addLog({author: "QueryInput", text: "Antwort des RAG-Systems erhalten"});
+        
+        if (this.chatID > 0)  {   ;     
           this.addMessage(response.data.message);
           let sourcesList = JSON.parse(response.data.sources.replace(/'/g, '"'));
           this.addSource(sourcesList);
           this.onSend = false;
+          this.addLog({author: "QueryInput", text: "Bestehenden Chat erweitert"});
         } else {
           let message = response.data.chat[response.data.chat.length -1].message;
           let sources = response.data.chat[response.data.chat.length -1].sources;
@@ -62,10 +71,13 @@ export default {
           this.addMessage(message);
           this.addSource(sourcesList);
           this.onSend = false;
+          this.addLog({author: "QueryInput", text: "Neuen Chat erstellt"});
         }
       } catch (error) {
         this.addMessage("Es ist ein Fehler aufgetreten");
         this.onSend = false;
+        console.error("Es ist ein Fehler aufgetreten",  error);
+        this.addLog({author: "QueryInput", text: "Es ist ein Fehler beim kommunizieren mit dem RAG-System aufgetreten"});
       }
       EventBus.emit('toggle-spinner');
 
@@ -81,7 +93,8 @@ export default {
   padding: 20px;
   height: 10vh;
   text-align: center;
-  margin: auto 0 0 0;
+  width: 100%;
+  margin: auto auto 0 auto;
 }
 
 input {

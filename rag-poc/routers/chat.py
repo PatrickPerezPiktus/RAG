@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from database import SessionLocal, ChatModel, MessageModel, ChunkModel
-import rag 
+from dbs.database import SessionLocal, ChatModel, MessageModel, ChunkModel
+from core import rag
 
 router = APIRouter()
 

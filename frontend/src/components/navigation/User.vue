@@ -1,10 +1,10 @@
 <template>
   <div class="user-elm">
     <div class="user-info" @click="showBtn = !showBtn">
-      <div ref="user">&nbsp; ID:{{this.user?.id}} &nbsp; User: {{this.user?.name}} &nbsp;</div>
       <font-awesome-icon :icon="['fas', 'user']"  />
+      <div ref="user"> &nbsp; {{this.user?.name}} </div>
     </div>
-    <div @click="logout">
+    <div v-if="showBtn" @click="logout">
       <font-awesome-icon :icon="['fas', 'right-from-bracket']"  />
     </div>
     <div v-if="showBtn" class="delete" @click="deleteUser">
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/axios';
 import { mapGetters, mapActions } from 'vuex';
 import EventBus from '../../eventBus.js';
 
@@ -39,6 +39,7 @@ export default {
   computed: {
     ...mapGetters(['user'])
   },
+
   data() {
     return {
       showBtn: false,
@@ -53,43 +54,54 @@ export default {
   },
 
   methods: {
-
     ...mapActions(['setUser']),  
+
     async createUser() {
       try {
-        const response = await axios.post('http://localhost:9000/user', { name: this.username, pw: this.pw });
-        console.debug(response.data);
+        const response = await axios.post('/user', { name: this.username, pw: this.pw });
+        console.log('Nutzer wurde erstellt: ', response);
+        this.addLog({author: "User", text: "Nutzer wurde erstellt"});
         this.setUser({id: response.data.id, pw: response.data.pw, name: response.data.name });
         this.login();
         EventBus.emit('loadChats');
         this.show = false;
       } catch (err) {
-        console.debug('Failed to create user: ' + err);
+        console.error('Nutzer konnte nicht erstellt werden: ', err);
+        this.addLog({author: "User", text: "Nutzer konnte nicht erstellt werden"});
       }
     },
+
     async deleteUser() {
       if (JSON.parse(localStorage.getItem('user')).name == '') {
-        console.debug("no user loged in to delete")
+        console.log('Kein Nutzer eingeloggt, der gelöscht werden konnte');
+        this.addLog({author: "User", text: "Kein Nutzer eingeloggt, der gelöscht werden konnte"});
         return;
       }
       try {
-        const response = await axios.post(`http://localhost:9000/user/delete`, this.user);
+        const response = await axios.post(`/user/delete`, this.user);
+        console.log('Nutzer gelöscht: ', response);
+        this.addLog({author: "User", text: "Nutzer gelöscht"});
         this.setUser({'id': '', 'name': '', 'pw': ''});
         EventBus.emit('loadChats');
         this.show = true;
       } catch (err) {
-        console.debug('Failed to delete user: ' + err.response.data.detail);
+        console.error('Es ist ein Fehler beim löschen eines Nutzers aufgetreten: ', error);
+        this.addLog({author: "User", text: "Es ist ein Fehler beim löschen eines Nutzers aufgetreten"});
       }
     },
+
     async getUsers() {
       try {
-        const response = await axios.get('http://localhost:9000/users');
+        const response = await axios.get('/users');
+        console.log('Alle Nutzer geladen: ', response);
+        this.addLog({author: "User", text: "Alle Nutzer geladen"});
       } catch (err) {
-        console.debug('Failed to load users: ' + err.response.data.detail);
+        console.log('Fehler beim laden aller Nutzer geladen: ', err);
+        this.addLog({author: "User", text: "Fehler beim laden aller Nutzer geladen"});
       }
     },
+
     async login() {
-      console.debug();
       try {
         if (JSON.parse(localStorage.getItem('user')) && JSON.parse(localStorage.getItem('user')).name) {          
           this.setUser(JSON.parse(localStorage.getItem('user')));
@@ -100,7 +112,7 @@ export default {
         }
 
         if (this.user.name == '') return;
-        const response = await axios.post('http://localhost:9000/login', {name: this.user.name, pw: this.user.pw});
+        const response = await axios.post('/login', {name: this.user.name, pw: this.user.pw});
         
         this.setUser(response.data);
         localStorage.setItem('user',JSON.stringify({'id': this.user.id,'name': this.user.name, 'pw': this.user.pw}));
@@ -109,9 +121,11 @@ export default {
         this.show = false;
       } catch (err) {
         this.setUser({'id': '', 'name': '', 'pw': ''});
-        console.debug('Failed to load users: ' + err);
+        console.log('Fehler beim laden eines Nutzers: ', err);
+        this.addLog({author: "User", text: "Fehler beim laden eines Nutzers"});
       }
     }, 
+    
     async logout()  {
       this.pw = '';
       this.username = '';

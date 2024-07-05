@@ -4,10 +4,8 @@ export default createStore({
   state: {
     logs: [{
       time: new Date().getTime(),
-      author: 'system',
+      author: 'store',
       text: 'System Up',
-      logClass: 'info',
-      isMine: false
     }],
     user: { name: '', pw: ''},
     chats: [],
@@ -19,9 +17,7 @@ export default createStore({
       state.logs.push({
         time: new Date().getTime(),
         author: log.author,
-        text: log.message,
-        isMine: log.author === 'user',
-        logClass: log.logClass
+        text: log.text,
       });
     },
     SET_USER(state, user) {

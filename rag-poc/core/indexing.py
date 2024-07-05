@@ -1,6 +1,6 @@
 import config
 from sqlalchemy.orm import Session
-from database import SessionLocal, DocumentModel, ChunkModel, UserModel, ChatModel, MessageModel
+from dbs.database import SessionLocal, DocumentModel, ChunkModel, UserModel, ChatModel, MessageModel
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
 import os

@@ -1,5 +1,5 @@
 import config
-from rag import query
+from core.rag import query
 
 
 def testMonopoly():

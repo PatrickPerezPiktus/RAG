@@ -6,7 +6,7 @@
       <div class="header-elm"> Name </div>
     </div>
 
-    <TableRow v-for='element in elements'
+    <TableRow v-for='element in this.elements'
             :id='element.id'
             :name='element.name'
             :chunks='element.chunks'/>
@@ -15,7 +15,7 @@
         <label for="fileInput" class="custom-file-upload">
           Datei auswählen
         </label>
-        <span v-if="selectedFile">{{ selectedFile.name }}</span>
+        <span v-if="this.selectedFile">{{ this.selectedFile.name }}</span>
         <button @click="uploadFile">Upload</button>
       </div>
   </div>
@@ -23,87 +23,73 @@
 
 <script>
 import EventBus from '../../eventBus';
-import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import axios from '@/axios';
 import TableRow from './TableRow.vue'
+import { mapActions } from 'vuex';
 
 export default {
   components: {
     TableRow
   }, 
-  setup() {
-    const selectedFile = ref(null);
-    const elements = ref([]);
 
-    const onFileChange = (event) => {
-      selectedFile.value = event.target.files[0];
+
+  data() {
+    return {
+      selectedFile: null,
+      elements: [],
     };
+  },
 
-    const getData = async () => {
-      
+  methods: {    
+    ...mapActions(['addLog']),  
+
+    async getData() {
       EventBus.emit('toggleSpinner');
       try {
-        const response = await axios.get('http://localhost:9000/documents_with_chunks');
-        console.log('aktuelle Dokumente:', response.data);
-        EventBus.emit('add-log',{
-              author: 'Documents',
-              text: response.data
-            });
-        elements.value = response.data.documents;
+        const response = await axios.get('/documents_with_chunks');
+        console.log("Dokumente mit Chunks geladen: ",  response.data);
+        this.addLog({author: "Docuemnts", text: "Dokumente mit Chunks geladen"});
+        this.elements = response.data.documents;
       } catch (error) {
-        console.error('Fehler beim Laden der Dokumente:', error);
-        EventBus.emit('add-log',{
-              author: 'Documents',
-              text: error
-            });
+        this.addLog({author: "Docuemnts", text: error});
+        console.error("Es ist ein Fehler aufgetreten",  error);
+        this.addLog({author: "Documents", text: "Es ist ein Fehler beim laden der Dokumente mit Chunks aufgetreten"});
       }
       EventBus.emit('toggleSpinner');
-    };
+    },
 
-  
-    const uploadFile = async () => {
-      if (selectedFile.value) {
+    async uploadFile() {
+      if (this.selectedFile) {
         EventBus.emit('toggleSpinner');
         const formData = new FormData();
-        formData.append('file', selectedFile.value);
+        formData.append('file', this.selectedFile);
         try {
-          const response = await axios.post('http://localhost:9000/add', formData, {
+          const response = await axios.post('/add', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
           });
-          console.log('File uploaded successfully', response.data);
-              
-          EventBus.emit('add-log',{
-              author: 'Documents',
-              text: response.data
-            });
-          getData();
+          console.log("Dokument hochgeladen:",  response);
+          this.addLog({author: "Documents", text: "Dokument erfolgreich hochgeladen"});
+          this.getData();
         } catch (error) {
-          console.error('Error uploading file', error);
-          EventBus.emit('add-log',{
-              author: 'Documents',
-              text: error
-            });
+          console.error('Es ist ein Fehler beim Hochladen einer Datei vorgekommen', error);
+          this.addLog({author: "Documents", text: "Dokument konnte nicht hochgeladen werden"});
         }
         EventBus.emit('toggleSpinner');
       } else {
         console.warn('No file selected');
-
       }
-    };
-
-    onMounted(() => {
-      getData();
-    });
-
-    return {
-      elements,
-      selectedFile,
-      onFileChange,
-      uploadFile
-    };
-  }
+    },
+    
+    onFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+  }, 
+  
+  mounted() {
+    this.getData();
+  },
 };
 </script>
 

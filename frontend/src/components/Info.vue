@@ -1,14 +1,14 @@
 <template>
-  <div class="log-wrapper">
+  <div class="all-log-wrapper">
     <div class="logs-wrapper">
       <div v-if="logs.length > 0" ref='logs' class='logs'>
-        <Log v-for='log in logs'
-            :key='log.time'
-            :class='["log", log.logClass]'
-            :dark='log.isMine'
-            :text='log.text'
-            :author='log.author'
-        />
+        <div class="log" v-for='log in this.logs'>
+          <div class="log-wrapper" @click="log.show = !log.show">
+            <div class="log-time">{{ new Date(log.time).toLocaleString() }} &nbsp;</div>
+            <div class="log-author">{{ log.author }}  </div>
+          </div>
+          <div v-if="log.show" class="log-text">{{ log.text }}</div>
+        </div>
         
       </div>
     </div>
@@ -16,15 +16,9 @@
 </template>
 
 <script>
-import EventBus from '../../eventBus.js';
 import { mapGetters, mapActions } from 'vuex';
-import Log from "./Log.vue";
 
 export default {
-  components: {
-    Log,
-  },
-
   computed: {
     ...mapGetters(['logs'])
   },
@@ -36,24 +30,12 @@ export default {
     };
   },
 
-  created() {
-    EventBus.on('add-log', this.addLog);
-  },
-
   methods: {
-
     ...mapActions(['addLog']),
+
     toggleSpinner() {
       this.loading = !this.loading;
     },
-    addNewLog() {
-      const newLog = {
-        author: 'user',
-        text: 'New log entry',
-        logClass: 'info'
-      };
-      this.addLog(newLog);
-    }
   }
 };
 </script>
@@ -79,6 +61,12 @@ export default {
 
 .log.right {
   margin-left: auto;
+}
+
+.log-wrapper {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
 }
 
 @media (min-width: 1024px) {

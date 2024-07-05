@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from database import SessionLocal, DocumentModel, ChunkModel
-import indexing
+from dbs.database import SessionLocal, DocumentModel, ChunkModel
+from core import indexing
 import os
 import shutil
 from typing import List

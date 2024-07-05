@@ -1,6 +1,4 @@
 <template>
-  
-  
   <div class="header">
     <div class="logo" @click="menu = !menu">🦝 RAG-Chat</div>
     <User />
@@ -25,7 +23,7 @@ import Spinner from './components/utils/Spinner.vue';
 import Chat from './components/chat/Chat.vue';
 import Config from './components/Config.vue';
 import Documents from './components/documents/Documents.vue';
-import Info from './components/info/Info.vue';
+import Info from './components/Info.vue';
 
 export default {
   components: {
@@ -52,10 +50,10 @@ export default {
   methods: {
     toggleSpinner() {
       this.spinning = !this.spinning;
-    },    
+    },
+    
     changePage(page) {
       this.activePage = page;
-      console.debug(this.activePage)
     }
   }
 };
@@ -98,6 +96,9 @@ body {
 
 .content {
   width: 100%;
+  height: 95vh;
+  max-height: 95vh;
+  overflow: auto;  
 }
 
 svg:hover {

@@ -13,7 +13,7 @@ load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
 
 dbPath = "database"
-dburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb' #"sqlite:///./database/test.db" 
+dburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb'  
 dataDump = "raw_data"
 k = 3
 activeDB = "chroma"

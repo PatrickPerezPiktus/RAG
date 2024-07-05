@@ -45,7 +45,7 @@
 
 <script>
 import EventBus from '../../eventBus.js';
-import axios from 'axios';
+import axios from '@/axios';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
@@ -63,14 +63,16 @@ export default {
   },
 
   methods: {
-    
-    ...mapActions(['setChats', 'setActiveChat', 'setChatID', 'delChat', 'renChat']),  
+    ...mapActions(['addLog', 'setChats', 'setActiveChat', 'setChatID', 'delChat', 'renChat']),  
+
     toggleSpinner() {
       this.loading = !this.loading;
     },
+
     changePage(page) {
       EventBus.emit('changePage', page);
     },
+
     async openChat(chat) {
       if (chat == 0) {
         this.setActiveChat([{
@@ -82,11 +84,11 @@ export default {
         this.setChatID(0);
       } else {
         try {
-          const response = await axios.get('http://localhost:9000/chat?chatID='+chat.id);
-          console.debug(response)
+          const response = await axios.get('/chat?chatID='+chat.id);
+          console.log("Chat geladen: ",  response);
+          this.addLog({author: "SideBar", text: "Chat wurde geladen"});
           
           response.data.forEach(msg => {
-            console.debug(msg);
             if (msg.sources != '') {  
               let sourcesList = JSON.parse(msg.sources.replace(/'/g, '"'));
               msg.sources = sourcesList;
@@ -95,11 +97,13 @@ export default {
           this.setChatID(chat.id);
           this.setActiveChat(response.data);
         } catch (error) {
-          console.error('Fehler beim Laden der Chats:', error);
+          console.error('Fehler beim Laden eines Chats:', error);
+          this.addLog({author: "SideBar", text: "Fehler beim Laden eines Chats"});
         }
       }
       EventBus.emit('changePage', 'chat');
     },
+
     async getChats() {
       if (this.user.id == '') {
         this.setChats([]);
@@ -107,34 +111,22 @@ export default {
         return;
       }
       try {
-        console.debug(this.user);
-        const response = await axios.get('http://localhost:9000/user_chats?userID='+this.user.id);
+        const response = await axios.get('/user_chats?userID='+this.user.id);
+        console.log('Chats geladen', response);
+        this.addLog({author: "SideBar", text: "Chats geladen"});
         this.setChats(response.data);
-        console.log('Chats:', response.data);
-        
-        EventBus.emit('add-log',{
-          author: 'sidebar',
-          text: response.data
-        });
       } catch (error) {
-        if (error.response.status == 404) {
-          console.log("keine msgs des Chats gefunden");
-          return;
-        }
-        console.error('Fehler beim Laden der Chats:', error);
-        EventBus.emit('add-log',{
-          author: 'sidebar',
-          text: error
-        });
+        console.error('Fehler beim Laden eines Chats:', error);
+        this.addLog({author: "SideBar", text: "Fehler beim Laden eines Chats"});
+        return;
       }
     },
+
     async deleteChat(chat) {
-      console.debug(this.chatID);
       try {
-          const response = await axios.post('http://localhost:9000/delete_chat?chatID='+chat.id);
-          console.debug(response);
-          
-          let index = this.chats.findIndex(obj => {console.debug(obj); return obj.id != chat.id});
+          const response = await axios.post('/delete_chat?chatID='+chat.id);
+          console.log('Chat gelöscht: ', response);
+          this.addLog({author: "SideBar", text: "Chat gelöscht"});
           
           this.delChat(chat.id);
           this.setChatID(0);
@@ -144,20 +136,22 @@ export default {
             text: "Frag etwas...",
             loading: false
           }]);
-          console.debug(this.chatID);
-
         } catch (error) {
-          console.error('Fehler beim Laden der Chats:', error);
+          console.error('Fehler beim Löschen eines Chats:', error);
+          this.addLog({author: "SideBar", text: "Fehler beim Löschen eines Chats"});
         }
     },
+    
     async renameChat(chat) {
-        console.debug("rename");
         try {
-          const response = await axios.post('http://localhost:9000/rename_chat', {chatID: chat.id, chatName: chat.name});
-          console.debug(response.data);
+          const response = await axios.post('/rename_chat', {chatID: chat.id, chatName: chat.name});
+          console.log('Chat umbenannt: ', response);
+          this.addLog({author: "SideBar", text: "Chat umbenannt"});
+
           this.renChat(response.data);
         } catch (error) {
-          console.error('Fehler beim Laden der Chats:', error);
+          console.error('Fehler beim Umbenennen des Chats:', error);
+          this.addLog({author: "SideBar", text: "Fehler beim Umbenennen des Chats"});
         }
         this.showInput = false;
     }

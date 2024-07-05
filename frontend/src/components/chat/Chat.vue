@@ -6,7 +6,7 @@
           <div v-if="message.sources" class="sources">
             <div class="source-text"> Quellen:</div>
             <div class="source" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }}</div>
-            <ChunkRow v-if="message.showChunk" @click="message.showChunk = false" :chunkID="message.chunk.chunkID" :content="message.chunk.content"/>
+            <ChunkRow v-if="message.showChunk" @click="message.showChunk = false" :chunkID="message.chunk?.chunkID" :content="message.chunk?.content"/>
           </div>
           <div v-if="message.loading"><Loading/></div>
         </div>
@@ -17,7 +17,7 @@
 
 <script>
 import EventBus from '../../eventBus.js';
-import axios from 'axios';
+import axios from '@/axios';
 import { mapGetters, mapActions } from 'vuex';
 import Loading from './Loading.vue';
 import QueryInput from "./QueryInput.vue";
@@ -29,41 +29,42 @@ export default {
     Loading,
     ChunkRow
   },
+
   computed: {
     ...mapGetters(['chats', 'user', 'activeChat', 'chatID'])
   },
 
-  data: () => ({
-    loading: false,
-    chunk: false
-  }),
+  data() {
+    return {
+      loading: false,
+      chunk: false
+    }
+  },
 
   created() {
     EventBus.on('toggle-spinner', this.toggleSpinner);
   },
 
   methods: {
-    ...mapActions(['setActiveChat', 'addActiveChat']),  
+    ...mapActions(['addLog', 'setActiveChat', 'addActiveChat']),  
+
     toggleSpinner() {
       this.loading = !this.loading;
     },
+
     async getChunk(chunkID, message) {
-      
       try {
-        const response = await axios.get('http://localhost:9000/load_chunk_by_id?chunkID='+chunkID);
+        const response = await axios.get('/load_chunk_by_id?chunkID='+chunkID);
+        console.log("Chunk geladen: {}", response.data);
+        this.addLog({author: "Config", text: "chunk "+chunkID+" geladen"});
+
         message.chunk = response.data;
       } catch (error) {
-        console.debug(error)
+        console.error("Es ist ein Fehler aufgetreten", error);
+        this.addLog({author: "Config", text: "Es ist ein Fehler beim laden eines Chunks aufgetreten"});
       }
-
     }
   },
-
-  mounted() {
-    console.debug(this.chats);
-    console.debug(this.chatID);
-    console.debug(this.activeChat);
-  }
 };
 </script>
 
@@ -80,6 +81,8 @@ export default {
   background: var(--msgs-background);
   max-width: 800px;
   padding: .5em;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .message + .message {

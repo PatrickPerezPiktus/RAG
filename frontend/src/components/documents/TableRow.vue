@@ -39,17 +39,21 @@ export default {
     flex-direction: row;
     border: 1px solid;
 }
+
 .data-elm:last-child {
   border-right: none;
 }
+
 .data-elm {
   border-right: 1px solid;
   padding: .5em;
   width: 40%;
 }
+
 .btn-elm {
   padding: 0cm;
 }
+
 button {
   padding: 0.4em;
   background-color: var(--btn-background-color);

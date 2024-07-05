@@ -4,122 +4,114 @@
       <div class="paramWrapper">
         <div class="param">
           <label for="llm">Sprachmodell:</label>
-          <select v-model="config.llm" id="llm" required>
-            <option v-for="option1 in config.llmOptions" :key="option1" :value="option1">{{ option1 }}</option>
+          <select v-model="this.config.llm" id="llm" required>
+            <option v-for="option1 in this.config.llmOptions" :key="option1" :value="option1">{{ option1 }}</option>
           </select>
         </div>
         <div class="param">
           <label for="embedding-model">Embedding-Model:</label>
-          <select v-model="config.embeddingModel"  id="embedding-model" required>
-            <option v-for="option2 in config.embeddingModelOptions" :key="option2" :value="option2">{{ option2 }}</option>
+          <select v-model="this.config.embeddingModel"  id="embedding-model" required>
+            <option v-for="option2 in this.config.embeddingModelOptions" :key="option2" :value="option2">{{ option2 }}</option>
           </select>
         </div>
         <div class="param">
           <label for="vektor-DB">Vektor-DB:</label>
-          <select v-model="config.vectorDB" id="vecttor-db" required>
-            <option v-for="option3 in config.vectorDBOptions" :key="option3" :value="option3">{{ option3 }}</option>
+          <select v-model="this.config.vectorDB" id="vecttor-db" required>
+            <option v-for="option3 in this.config.vectorDBOptions" :key="option3" :value="option3">{{ option3 }}</option>
           </select>
         </div>
       </div>
       <div class="param">
         <label for="prompt">Prompt:</label>
-        <textarea  v-model="config.promptTemplate" id="prompt" required />
+        <textarea  v-model="this.config.promptTemplate" id="prompt" required />
       </div>
       <div class="param">
         <label for="test-Prompt">Test-Promopt:</label>
-        <textarea  v-model="config.testPrompt" id="test-prompt" required />
+        <textarea  v-model="this.config.testPrompt" id="test-prompt" required />
       </div>
       <div class="param">
         <label for="dbPath">SQL-DB:</label>
-        <input v-model="config.dbPath" id="dbPath" type="text" required />
+        <input v-model="this.config.dbPath" id="dbPath" type="text" required />
       </div>
       <div class="param">
         <label for="dataDump">Daten:</label>
-        <input v-model="config.dataDump" id="dataDump" type="input" required />
+        <input v-model="this.config.dataDump" id="dataDump" type="input" required />
       </div>
       <div class="paramWrapper">
         <div class="param">
           <label for="k">Suchparameter(k-val)</label>
-          <input v-model="config.k" id="k" type="number" required />
+          <input v-model="this.config.k" id="k" type="number" required />
         </div>
         <div class="param">
           <label for="chunkSize">Chunk-Größe:</label>
-          <input v-model="config.chunk_size" id="chunkSize" type="number" required />
+          <input v-model="this.config.chunk_size" id="chunkSize" type="number" required />
         </div>
         <div class="param">
           <label for="chunkOverlap">Chunk-Overlap:</label>
-          <input v-model="config.chunk_overlap" id="chunkOverlap" type="number" required />
+          <input v-model="this.config.chunk_overlap" id="chunkOverlap" type="number" required />
         </div>
       </div>
       <button type="submit">Speichern</button>
     </form>
   </div>
 </template>
+
 <script>
-import EventBus from '../eventBus.js';
-import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import axios from '@/axios';
+import { mapActions } from 'vuex';
 
 export default {
-  setup() {
-    const config = ref({
-      llmOptions: ["openai","mistral"],
-      embeddingModelOptions: ["openai", "cohore"],
-      vectorDBOptions: ["chroma", "pinecone"],
-      llm: "openai",
-      embeddingModel: 'openai',
-      vectorDB: 'chroma',
-      promptTemplate: '',
-      testPrompt: '',
-      dbPath: '',
-      dataDump: '',
-      k: 3,
-      chunk_size: 800,
-      chunk_overlap: 80,
-      apiKey: ''
-    });
-    const getConfig = async () => {
-      try {
-        const response = await axios.get('http://localhost:9000/get_config');
-        console.log('aktuelle Konfiguration:', response.data);
-        
-        EventBus.emit('add-log',{
-          author: 'config',
-          text: response.data
-        });
-        config.value = response.data.config;
-      } catch (error) {
-        console.error('Fehler beim Laden der Konfiguration:', error);
-        EventBus.emit('add-log',{
-          author: 'config',
-          text: error
-        });
+  data() {
+    return {
+      config: {
+        llmOptions: ["openai","mistral"],
+        embeddingModelOptions: ["openai", "cohore"],
+        vectorDBOptions: ["chroma", "pinecone"],
+        llm: "openai",
+        embeddingModel: 'openai',
+        vectorDB: 'chroma',
+        promptTemplate: '',
+        testPrompt: '',
+        dbPath: '',
+        dataDump: '',
+        k: 3,
+        chunk_size: 800,
+        chunk_overlap: 80,
+        apiKey: ''
       }
-    };
+    }
+  },
 
-    const saveConfig = async () => {
+  methods: {
+    ...mapActions(['addLog']),
+
+    async getConfig() {
       try {
-        const response = await axios.post('http://localhost:9000/update_config', config.value);
+        const response = await axios.get('/get_config');
+        this.addLog({author: "Config", text: "konfiguration geladen"});
+        console.log('aktuelle Konfiguration:', response.data);
+  
+        this.config = response.data.config;
+      } catch (error) {
+        this.addLog({author: "Config", text: "error"})
+        console.error('Fehler beim Laden der Konfiguration:', error);
+      }
+    },
+
+    async saveConfig() {
+      try {
+        const response = await axios.post('/update_config', this.config);
         console.log('Konfiguration gespeichert:', response.data);
-        EventBus.emit('add-log',{
-          author: 'config',
-          text: response.data
-        });
+        this.addLog({author: "Config", text: "konfiguration gespeichert"});
       } catch (error) {
         console.error('Fehler beim Speichern der Konfiguration:', error);
-        EventBus.on('add-log',{
-          author: 'config',
-          text: error
-        });
+        this.addLog({author: "Config", text: "Fehler beim Speichern der Konfiguration"});
       }
-    };
+    }
+  },
 
-    onMounted(getConfig);
-
-    return {
-      config,
-      saveConfig
-    };
+  mounted() {
+    this.getConfig();
   }
 };
 </script>
