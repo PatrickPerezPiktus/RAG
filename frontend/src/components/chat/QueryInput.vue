@@ -48,6 +48,8 @@ export default {
       this.onSend = true;
 
       try {
+        
+        const res = await axios.get('/users/me');
         const response = await axios.post('/chat', {
           chatID: this.chatID,
           userID: this.user.id,
@@ -55,10 +57,11 @@ export default {
         });
         console.log("Antwort des RAG-Systems: ",  response);
         this.addLog({author: "QueryInput", text: "Antwort des RAG-Systems erhalten"});
-        
-        if (this.chatID > 0)  {   ;     
-          this.addMessage(response.data.message);
-          let sourcesList = JSON.parse(response.data.sources.replace(/'/g, '"'));
+        if (this.chatID > 0)  {   
+          let message = response.data.chat[response.data.chat.length -1].message;
+          let sources = response.data.chat[response.data.chat.length -1].sources;     
+          this.addMessage(message);
+          let sourcesList = JSON.parse(sources.replace(/'/g, '"'));
           this.addSource(sourcesList);
           this.onSend = false;
           this.addLog({author: "QueryInput", text: "Bestehenden Chat erweitert"});
@@ -121,5 +124,16 @@ button {
 
 button:hover {
   background-color: var(--btn-hover-background-color);
+}
+
+@media (max-width: 1024px) {
+  input {
+    font-size: 1em;
+    width: 60%;
+  }
+  
+  button {
+    font-size: 1em;
+  }
 }
 </style>

@@ -5,14 +5,11 @@
           <div class="text">{{ message.message }} </div>
           <div v-if="message.sources" class="sources">
             <div class="source-wrapper">
-              <div class="source-text" @click="message.showSources = !message.showSources"> 
-                Quellen &nbsp;
-                <font-awesome-icon :icon="['fas', 'minus']" v-if="message.showSources"/>
-                <font-awesome-icon :icon="['fas', 'plus']" v-if="!message.showSources"/>
-              </div>
-              <div class="source" v-if="message.showSources" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }}</div>
+              <div class="source-text">Quellen: &nbsp;</div>
+              <div class="source" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }} &nbsp;</div>
+              <font-awesome-icon :icon="['fas', 'minus']" v-if="message.showChunk" @click="message.showChunk = !message.showChunk;"/>
             </div>
-            <ChunkRow v-if="message.showChunk" @click="message.showChunk = false" :chunkID="message.chunk?.chunkID" :content="message.chunk?.content"/>
+            <ChunkRow v-if="message.showChunk" :chunkID="message.chunk?.chunkID" :content="message.chunk?.content"/>
           </div>
           <div v-if="message.loading"><Loading/></div>
         </div>
@@ -85,9 +82,9 @@ export default {
 
 .messages {
   background: var(--msgs-background);
-  max-width: 800px;
   padding: .5em;
-  margin: 0 auto;
+  margin: .5em auto;
+  max-width: 800px;
   width: 100%;
 }
 
@@ -95,20 +92,16 @@ export default {
   margin: .5em .5em 0 0;
 }
 
-.message.user {
-  margin-left: auto;
-}
-
 .message {
   background: var(--msg-background);
   border-radius: 10px 10px 0 10px;
   padding: .5em;
   width: fit-content;
-  max-width: 800px;
 }
 
 .message.user {
   background: var(--msg-dark-background);
+  margin-left: auto;
 }
 
 .author {
@@ -120,18 +113,20 @@ export default {
 .sources {
   font-size: 14px;
   display: flex;
+  flex-direction: column;
   border-top: 2px solid;
   margin-top: 1em;
 }
 
 .source-wrapper {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  margin: .5em 0;
 }
 
 .source-text {
   color: var(--color);
-  margin-top: 1em;
+  margin-right: 1em;
   display: flex;
   flex-direction: row;
 }
@@ -142,14 +137,12 @@ export default {
 }
 
 .chunk-row {
-  padding: .25em;
-  padding-left: 7em;
   text-align: justify;
   border: none;
 }
 
 .hl {
-  font-size: 20px;
+  font-size: 20px!important;
 }
 
 @media (min-width: 1024px) {

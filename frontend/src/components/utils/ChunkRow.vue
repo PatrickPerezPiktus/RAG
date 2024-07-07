@@ -18,7 +18,7 @@ export default {
 .hl {
   font-weight: 600;
   margin-bottom: 1em;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .text {

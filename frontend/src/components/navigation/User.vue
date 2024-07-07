@@ -45,6 +45,7 @@ export default {
       showBtn: false,
       show: true,
       username: '',
+      id: '',
       pw: '',
     }
   },
@@ -61,9 +62,8 @@ export default {
         const response = await axios.post('/user', { name: this.username, pw: this.pw });
         console.log('Nutzer wurde erstellt: ', response);
         this.addLog({author: "User", text: "Nutzer wurde erstellt"});
-        this.setUser({id: response.data.id, pw: response.data.pw, name: response.data.name });
+        this.setUser({id: response.data.id, name: response.data.name });
         this.login();
-        EventBus.emit('loadChats');
         this.show = false;
       } catch (err) {
         console.error('Nutzer konnte nicht erstellt werden: ', err);
@@ -78,11 +78,11 @@ export default {
         return;
       }
       try {
-        const response = await axios.post(`/user/delete`, this.user);
+        const response = await axios.post(`/user/delete`, this.user.name);
         console.log('Nutzer gelöscht: ', response);
         this.addLog({author: "User", text: "Nutzer gelöscht"});
-        this.setUser({'id': '', 'name': '', 'pw': ''});
-        EventBus.emit('loadChats');
+        this.setUser({ 'id': '', 'name': '', 'token': '' });
+        localStorage.removeItem('user');
         this.show = true;
       } catch (err) {
         console.error('Es ist ein Fehler beim löschen eines Nutzers aufgetreten: ', error);
@@ -103,36 +103,40 @@ export default {
 
     async login() {
       try {
-        if (JSON.parse(localStorage.getItem('user')) && JSON.parse(localStorage.getItem('user')).name) {          
-          this.setUser(JSON.parse(localStorage.getItem('user')));
-          this.username = this.user.name;
-          this.pw = this.user.pw;
-        } else if (this.show) {
-          this.setUser({ name: this.username, pw: this.pw });
+        let response;
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser && storedUser.token) {
+          response = await axios.post('/token', {}, {
+            headers: {
+              'Authorization': `Bearer ${storedUser.token}`
+            }
+          });
+          console.debug("response");
+          console.debug(response);
+        } else {
+          response = await axios.post('/token', { name: this.username, pw: this.pw });
         }
 
-        if (this.user.name == '') return;
-        const response = await axios.post('/login', {name: this.user.name, pw: this.user.pw});
-        
-        this.setUser(response.data);
-        localStorage.setItem('user',JSON.stringify({'id': this.user.id,'name': this.user.name, 'pw': this.user.pw}));
-      
-        EventBus.emit('loadChats');
+        const { access_token, token_type, id, username } = response.data;
+        this.setUser({ id: id, name: username, token: access_token });
+        localStorage.setItem('user', JSON.stringify({ id: id, name: username, token: access_token }));
         this.show = false;
         EventBus.emit('getChats');
       } catch (err) {
-        this.setUser({'id': '', 'name': '', 'pw': ''});
-        console.log('Fehler beim laden eines Nutzers: ', err);
-        this.addLog({author: "User", text: "Fehler beim laden eines Nutzers"});
+        if (err.response.status == 401) {
+          this.setUser({ 'id': '', 'name': '', 'token': '' });
+          localStorage.removeItem("user");
+        }
+        console.log('Fehler beim Anmelden: ', err);
+        this.addLog({ author: "User", text: "Fehler beim Anmelden" });
       }
-    }, 
+    },
     
     async logout()  {
       this.pw = '';
       this.username = '';
       localStorage.removeItem("user");
-      this.setUser({'id': '', 'name': '', 'pw': ''});
-      EventBus.emit('loadChats');
+      this.setUser({'id': '', 'name': '', token: ''});
       this.show = true;
     }
   },

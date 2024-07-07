@@ -25,13 +25,13 @@
         <div class="elm-content" v-if='!chat.showInput' @click="chat.showInput = !chat.showInput">
           <font-awesome-icon :icon="['fas', 'bars']" />
         </div>
+        <div class="elm-content delete" v-if='chat.showInput' @click="deleteChat(chat)">
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </div>
         <input class="elm-content" v-if='chat.showInput' v-model="chat.name" />
         <div class="elm-content" v-if='chat.showInput'
               @click="renameChat(chat); chat.showInput = !chat.showInput">
           <font-awesome-icon :icon="['fas', 'pen']" />
-        </div>
-        <div class="elm-content delete" v-if='chat.showInput' @click="deleteChat(chat)">
-          <font-awesome-icon :icon="['fas', 'trash']" />
         </div>
         <div class="elm-content" v-if='chat.showInput' @click="chat.showInput = !chat.showInput">
           <font-awesome-icon :icon="['fas', 'x']" />
