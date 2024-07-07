@@ -11,6 +11,10 @@ import chromadb
 
 load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
+jwt_secret_key = os.environ['JWT_SECRET_KEY']
+
+hash_algo = "HS256"
+token_expire_minutes = 90
 
 dbPath = "database"
 dburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb'  

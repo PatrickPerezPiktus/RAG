@@ -33,14 +33,11 @@ def persist(document: Document, documentID):
 
     items = db.get(include=[])
     ids = set(items["ids"])
-    print(f"{len(ids)} chunks in DB")
-    print(len(chunkIDs))
     newChunks = []
 
     try:
         session = SessionLocal()
         for chunk in chunkIDs:
-            print(chunk)
             if chunk.metadata["id"] not in ids:
                     newChunks.append(chunk)
                     chunkModelObject = ChunkModel(documentID=documentID, chunkID=chunk.metadata["id"], content=chunk.page_content.encode('utf-8'))
@@ -53,13 +50,9 @@ def persist(document: Document, documentID):
     finally:
         session.close()
 
-        print(len(newChunks))
-
         if len(newChunks):
-            print(f"Upload {len(newChunks)} new chunk(s)")
             chunkIDs = [chunk.metadata["id"] for chunk in newChunks]
             db.add_documents(newChunks, ids=chunkIDs)
-            db.persist()
         else:
             print("No new documents to upload")
         

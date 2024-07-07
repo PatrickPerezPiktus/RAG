@@ -24,3 +24,5 @@ app.include_router(document.router)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="localhost", port=9000)
+    #TODO start mit HTTPS
+    #uvicorn your_app:app --host 0.0.0.0 --port 8000 --ssl-keyfile /path/to/your/keyfile --ssl-certfile /path/to/your/certfile 
