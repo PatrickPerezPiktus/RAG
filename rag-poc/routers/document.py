@@ -4,9 +4,13 @@ from pydantic import BaseModel
 from dbs.database import get_db, DocumentModel, ChunkModel
 from routers.user import get_current_user, User
 from core import indexing
+import config
 import os
 import shutil
 from typing import List
+import numpy as np
+from sklearn.decomposition import PCA
+from umap import UMAP
 
 router = APIRouter()
 
@@ -77,3 +81,47 @@ async def load_chunk_by_id(chunkID: str, db: Session = Depends(get_db), user: Us
         return {"chunkID": chunk.chunkID, "content": chunk.content.decode('utf-8')}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Fehler beim Laden des Chunks: {str(e)}")
+
+@router.get("/embedded_data")
+async def get_embedded_data(): #user: User = Depends(get_current_user) TODO 
+    try:
+        data = config.db.get(include=["embeddings"])
+        embeddings = np.array(data['embeddings'])
+        pca = PCA(n_components=3)
+        reduced_embeddings = pca.fit_transform(embeddings)
+        return {'ids': data['ids'], 'vectors': reduced_embeddings.tolist()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Fehler beim Abrufen der Vektor-Daten: {str(e)}")
+
+@router.get("/embedded_data_umap")
+async def get_embedded_data_umap():  # user: User = Depends(get_current_user) TODO
+    try:
+        data = config.db.get(include=["embeddings"])
+        embeddings = np.array(data['embeddings'])
+
+        umap = UMAP(n_components=3)
+        reduced_embeddings = umap.fit_transform(embeddings)
+
+        return {'ids': data['ids'], 'vectors': reduced_embeddings.tolist()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Fehler beim Abrufen der Vektor-Daten: {str(e)}")
+
+class EmbeddingMsg(BaseModel):
+    test: str
+
+@router.get("/embedded_data_umap_msg")
+async def get_embedding(emb: EmbeddingMsg): #, user: User = Depends(get_current_user)
+    embedding = indexing.getEmbedding(emb.text)
+    try:
+        data = config.db.get(include=["embeddings"])
+        data['embeddings'].append(embedding)
+        embeddings = np.array(data['embeddings'])
+
+        umap = UMAP(n_components=3)
+        reduced_embeddings = umap.fit_transform(embeddings)
+        data['ids'].append(msg)
+        return {'ids': data['ids'], 'vectors': reduced_embeddings.tolist()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Fehler beim Abrufen der Vektor-Daten: {str(e)}")
+
+

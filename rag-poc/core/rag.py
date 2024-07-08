@@ -12,7 +12,7 @@ def query(queryInput):
     context = "\n---\n".join([doc.page_content for doc, _score in results])
     sources = [doc.metadata.get("id", None) for doc, _score in results]
     promtTemplate = ChatPromptTemplate.from_template(config.promptTemplate)
-    prompt = promtTemplate.format(context=context, question=queryInput, sources=sources)
+    prompt = promtTemplate.format(context=context, question=queryInput)
 
     #Generation
     response = config.getLLM().invoke(prompt)

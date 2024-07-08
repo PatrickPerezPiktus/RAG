@@ -77,10 +77,6 @@ Beantworte die Frage nur auf der Grundlage des folgenden Kontextes:
 ---
 
 Frage: {question}
-
----
-
-Quellen: {sources}
 """
 
 
