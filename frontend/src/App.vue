@@ -89,6 +89,7 @@ export default {
 
 html {
   font-family: 'Lucida Console', 'Georama', sans-serif;
+  /**font-family: 'Courier New', monospace; */
 }
 
 body {

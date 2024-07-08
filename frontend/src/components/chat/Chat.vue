@@ -14,7 +14,11 @@
           <div v-if="message.loading"><Loading/></div>
         </div>
     </div>
+    <div class="togleData">
+      <button @click="this.show = !this.show">Datenansicht wechseln</button>
+    </div>
     <QueryInput v-if="this.activeChat.length > 0" />
+    <Plot v-if="this.show"></Plot>
   </div>
 </template>
 
@@ -25,12 +29,14 @@ import { mapGetters, mapActions } from 'vuex';
 import Loading from './Loading.vue';
 import QueryInput from "./QueryInput.vue";
 import ChunkRow from '../utils/ChunkRow.vue';
+import Plot from '../documents/Plot.vue';
 
 export default {
   components: {
     QueryInput,
     Loading,
-    ChunkRow
+    ChunkRow,
+    Plot
   },
 
   computed: {
@@ -40,7 +46,8 @@ export default {
   data() {
     return {
       loading: false,
-      chunk: false
+      chunk: false,
+      show: false
     }
   },
 
@@ -59,12 +66,12 @@ export default {
       try {
         const response = await axios.get('/load_chunk_by_id?chunkID='+chunkID);
         console.log("Chunk geladen: {}", response.data);
-        this.addLog({author: "Config", text: "chunk "+chunkID+" geladen"});
+        this.addLog({author: "Chat", text: "chunk "+chunkID+" geladen"});
 
         message.chunk = response.data;
       } catch (error) {
         console.error("Es ist ein Fehler aufgetreten", error);
-        this.addLog({author: "Config", text: "Es ist ein Fehler beim laden eines Chunks aufgetreten"});
+        this.addLog({author: "Chat", text: "Es ist ein Fehler beim laden eines Chunks aufgetreten"});
       }
     }
   },
@@ -143,6 +150,24 @@ export default {
 
 .hl {
   font-size: 20px!important;
+}
+
+button {
+  padding: 0.4em;
+  margin: .5em .2em;
+  background-color: var(--btn-background-color);
+  color: var(--btn-color);
+  font-size: .75em;
+  border-radius:10px;
+  min-width: fit-content;
+  border: none;
+  cursor: pointer;
+}
+
+.togleData {
+  padding-left: 1em;
+  margin: 0 auto; 
+  width: 800px;
 }
 
 @media (min-width: 1024px) {

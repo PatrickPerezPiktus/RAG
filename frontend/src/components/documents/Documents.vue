@@ -1,6 +1,8 @@
 <template>
-  <div class="database">
-    
+  <div class="togleData">
+    <button @click="this.show = !this.show">Datenansicht wechseln</button>
+  </div>
+  <div v-if="!show" class="database">    
     <div class="header-row">
       <div class="header-elm"> ID </div>
       <div class="header-elm"> Name </div>
@@ -19,17 +21,20 @@
         <button @click="uploadFile">Upload</button>
       </div>
   </div>
+  <Plot v-if="show"></Plot>
 </template>
 
 <script>
 import EventBus from '../../eventBus';
 import axios from '@/axios';
 import TableRow from './TableRow.vue'
+import Plot from './Plot.vue';
 import { mapActions } from 'vuex';
 
 export default {
   components: {
-    TableRow
+    TableRow,
+    Plot
   }, 
 
 
@@ -37,6 +42,7 @@ export default {
     return {
       selectedFile: null,
       elements: [],
+      show: false
     };
   },
 
@@ -127,5 +133,11 @@ export default {
 .header-elm {
   width: 40%;
   margin-left: .5em;
+}
+
+.togleData {
+  margin: 0 auto; 
+  margin-top: 1em;
+  width: 800px;
 }
 </style>

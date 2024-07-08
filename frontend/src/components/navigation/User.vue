@@ -111,8 +111,7 @@ export default {
               'Authorization': `Bearer ${storedUser.token}`
             }
           });
-          console.debug("response");
-          console.debug(response);
+          //TODO log
         } else {
           response = await axios.post('/token', { name: this.username, pw: this.pw });
         }
