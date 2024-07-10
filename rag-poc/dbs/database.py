@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import config
 
-DATABASE_URL = config.dburl
+DATABASE_URL = config.sqldburl
 Base = declarative_base()
 engine = create_engine(DATABASE_URL, pool_recycle=3600)
 connection = engine.connect()

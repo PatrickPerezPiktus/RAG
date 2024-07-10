@@ -30,8 +30,8 @@
         <textarea  v-model="this.config.testPrompt" id="test-prompt" required />
       </div>
       <div class="param">
-        <label for="dbPath">SQL-DB:</label>
-        <input v-model="this.config.dbPath" id="dbPath" type="text" required />
+        <label for="sqldburl">SQL-DB:</label>
+        <input v-model="this.config.sqldburl" id="sqldburl" type="text" required />
       </div>
       <div class="param">
         <label for="dataDump">Daten:</label>
@@ -72,7 +72,7 @@ export default {
         vectorDB: 'chroma',
         promptTemplate: '',
         testPrompt: '',
-        dbPath: '',
+        sqldburl: '',
         dataDump: '',
         k: 3,
         chunk_size: 800,

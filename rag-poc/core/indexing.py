@@ -26,11 +26,9 @@ def persist(document: Document, documentID):
         length_function=config.splitter['length_function'],
         is_separator_regex=config.splitter['is_separator_regex'],
     )
-
     chunks = splitter.split_documents(document)
-    db = config.db
+    db = config.getDB()
     chunkIDs = getChunkIDs(chunks)
-
     items = db.get(include=[])
     ids = set(items["ids"])
     newChunks = []
@@ -39,10 +37,9 @@ def persist(document: Document, documentID):
         session = SessionLocal()
         for chunk in chunkIDs:
             if chunk.metadata["id"] not in ids:
-                    newChunks.append(chunk)
-                    chunkModelObject = ChunkModel(documentID=documentID, chunkID=chunk.metadata["id"], content=chunk.page_content.encode('utf-8'))
-                    session.add(chunkModelObject)
-        
+                newChunks.append(chunk)
+                chunkModelObject = ChunkModel(documentID=documentID, chunkID=chunk.metadata["id"], content=chunk.page_content.encode('utf-8'))
+                session.add(chunkModelObject)
         session.commit()
         session.refresh(chunkModelObject)
     except Exception as e:
@@ -90,7 +87,6 @@ def loadDocument(file_path: str):
 
     try:
         session = SessionLocal()
-        
         with open(file_path, "rb") as f:
             content = f.read()
             document = DocumentModel(name=os.path.basename(file_path), content=content)
@@ -102,6 +98,6 @@ def loadDocument(file_path: str):
         return {"error": str(e)}
     finally:
         session.close()
-
+        
     document = loader.load()
     persist(document, dID)
