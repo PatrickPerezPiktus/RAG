@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from routers.user import get_current_user, User
+from routers.user import getCurrentUser, User
 import config
 
 router = APIRouter()
@@ -18,7 +18,7 @@ class ConfigData(BaseModel):
     testPrompt: str
 
 @router.post("/update_config")
-async def update_config(config_data: ConfigData, user: User = Depends(get_current_user)):
+async def updateConfig(config_data: ConfigData, user: User = Depends(getCurrentUser)):
     try:
         config.updateParameters(config_data)
         return {"message": "Konfiguration erfolgreich aktualisiert", "config": config.getParameters()}
@@ -26,7 +26,7 @@ async def update_config(config_data: ConfigData, user: User = Depends(get_curren
         raise HTTPException(status_code=500, detail=f"Die Konfiguration konnte nicht verändert werden: {str(e)}")
 
 @router.get("/get_config")
-async def get_config(user: User = Depends(get_current_user)):
+async def getConfig(user: User = Depends(getCurrentUser)):
     try:
         return {"config": config.getParameters()}
     except Exception as e:

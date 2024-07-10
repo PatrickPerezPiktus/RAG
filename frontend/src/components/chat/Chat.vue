@@ -6,7 +6,7 @@
           <div v-if="message.sources" class="sources">
             <div class="source-wrapper">
               <div class="source-text">Quellen: &nbsp;</div>
-              <div class="source" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }} &nbsp;</div>
+              <div class="source" v-for="s in message.sources" @click="getChunk(s, message); message.showChunk = true"> {{ s }} &nbsp; </div>
               <font-awesome-icon :icon="['fas', 'minus']" v-if="message.showChunk" @click="message.showChunk = !message.showChunk;"/>
             </div>
             <ChunkRow v-if="message.showChunk" :chunkID="message.chunk?.chunkID" :content="message.chunk?.content"/>
@@ -14,11 +14,7 @@
           <div v-if="message.loading"><Loading/></div>
         </div>
     </div>
-    <div class="togleData">
-      <button @click="this.show = !this.show">Datenansicht wechseln</button>
-    </div>
     <QueryInput v-if="this.activeChat.length > 0" />
-    <Plot v-if="this.show"></Plot>
   </div>
 </template>
 
@@ -29,14 +25,12 @@ import { mapGetters, mapActions } from 'vuex';
 import Loading from './Loading.vue';
 import QueryInput from "./QueryInput.vue";
 import ChunkRow from '../utils/ChunkRow.vue';
-import Plot from '../documents/Plot.vue';
 
 export default {
   components: {
     QueryInput,
     Loading,
-    ChunkRow,
-    Plot
+    ChunkRow
   },
 
   computed: {
@@ -46,8 +40,7 @@ export default {
   data() {
     return {
       loading: false,
-      chunk: false,
-      show: false
+      chunk: false
     }
   },
 
@@ -104,6 +97,7 @@ export default {
   border-radius: 10px 10px 0 10px;
   padding: .5em;
   width: fit-content;
+  max-width: 800px;
 }
 
 .message.user {
@@ -129,6 +123,7 @@ export default {
   display: flex;
   flex-direction: row;
   margin: .5em 0;
+  flex-wrap: wrap;
 }
 
 .source-text {

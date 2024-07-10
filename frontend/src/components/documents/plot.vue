@@ -188,6 +188,7 @@ export default {
   align-items: center;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 </style>

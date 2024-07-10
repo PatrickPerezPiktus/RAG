@@ -5,7 +5,7 @@ from myapp import app  # Dein FastAPI-Anwendungsobjekt
 
 client = TestClient(app)
 
-def test_update_config():
+def testUpdateConfig():
     new_config = {
         "llm": "new_llm",
         "vectorDB": "new_vectorDB",
