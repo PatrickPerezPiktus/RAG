@@ -15,12 +15,12 @@ import chromadb
 dataDump = "_raw_data"
 
 # SQL-DB PATH 
-sqldburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb'
+sqldburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb' #db
 
 # ANN-Search-Val (Anzahl der Elemente)
 k = 3
 
-# .env vars 
+### .env vars 
 load_dotenv()
 
 # JSON Web Token Key 
@@ -55,6 +55,7 @@ splitter = dict(
     is_separator_regex=False,
 )
 
+
 ### EMBEDDING-MODELS
 activeEmbedding = "openai"
 
@@ -77,15 +78,16 @@ embeddingsmodel = embeddingModelList[activeEmbedding]
 activeLLM = "openai"
 
 # OPENAI
+temperature=0
 openai.api_key = os.environ['OPENAI_API_KEY']
-openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k")
+openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=temperature)
 # Local Llama 
 llamaLLM = Ollama(model="llama3")
 # Local Mistral
 mistralLLM = "" #Ollama("mistral")
 
 llmList = dict(
-    openai= openaiLLM,
+    openai=openaiLLM,
     mistral=mistralLLM,
     llama=llamaLLM
 )
@@ -100,13 +102,13 @@ activeDB = "chroma"
 pinecone = ""#PineconeVectorStore.from_documents(docs, embeddings, index_name=index_name)
 # Chroma
 dbDirectory = "database"
-chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+chroma_client = chromadb.HttpClient(host='localhost', port=8000) #host='chromadb'
 collection = chroma_client.get_or_create_collection(name="games")
 chroma = Chroma(persist_directory=dbDirectory, embedding_function=embeddingsmodel, client=chroma_client)
 
 dbList = dict(
-    chroma= chroma, 
-    pinecone= pinecone 
+    chroma=chroma, 
+    pinecone=pinecone 
 )
 def getDB():
     return dbList[activeDB]
@@ -122,10 +124,15 @@ indem du mehrere Perspektiven auf die Frage des Benutzers erzeugst.
 Gib diese alternativen Fragen durch Zeilenumbrüche getrennt aus.
 Ursprüngliche Benutzerfrage: {question}"""
 
+# HyDE-Porompt
+hyde_template = """Schreibe einen Abschnitt wie er in Versicherungsbedingungen stehen könnte, um die folgende Frage zu beantworten
+Frage: {question}
+Abschnitt:"""
+
 # RAG-Prompt 
 promptTemplate = """
 Du bist ein Assistent zur Beantwortung von Fragen im Bezug auf Versicherungsbedingungen. 
-Damit du genaue Informationen geben kannst wird dir ein Kontext zur verfügung gestellt. 
+Damit du genaue Informationen geben kannst, werden dir Teile aus Dokumenten zur verfügung gestellt. 
 Dieser Kontext wird aus Teilstücken von Dokumenten zusammengesetzt.
 Beantworte die Frage auf der Grundlage des folgenden Kontextes:
 
@@ -138,10 +145,10 @@ Frage: {question}
 
 # Test-Prompt 
 testPrompt = """
-Expected Response: {expected}
-Actual Response: {actual}
+Erwartete Antwort: {expected}
+Wirkliche Antwort: {actual}
 ---
-(Answer with 'true' or 'false') Does the actual response match the expected response? 
+(Antworte mit 'true' oder 'false') Stimmt die wirkliche Antwort mit der erwarteten Antwort überein? 
 """
 
 ### Konfuguration bereitstellen: 
