@@ -25,7 +25,6 @@ export default {
 
   data() {
     return {
-      user: { name: "User", id: 1 },
       loading: false
     };
   },

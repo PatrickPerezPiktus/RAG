@@ -187,7 +187,7 @@ input {
   top: 0;
   width: 100%;
   height: 100%;
-  background: #454545a8;
+  background: #454545;
   z-index: 1;
 }
 
