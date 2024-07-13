@@ -1,10 +1,8 @@
 import config
 import argparse
-from langchain.prompts import ChatPromptTemplate
-
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.load import dumps, loads
-
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import  StrOutputParser
 from langchain_openai import ChatOpenAI
 from operator import itemgetter
 from langchain_core.runnables import RunnablePassthrough
@@ -12,12 +10,7 @@ from langchain_core.runnables import RunnablePassthrough
 def multiQuery():
     prompt_perspectives = ChatPromptTemplate.from_template(config.multiQuery_template)
 
-    return (
-        prompt_perspectives 
-        | config.getLLM()
-        | StrOutputParser() 
-        | (lambda x: x.split("\n"))
-    )
+    return (prompt_perspectives | config.getLLM() | StrOutputParser() | (lambda x: x.split("\n")))
 
 def getUniqueDocs(documents):
     flattened_docs = [dumps(doc) for sublist in documents for doc in sublist]
@@ -28,36 +21,61 @@ def retrievalChain(queryInput):
     # RetrieveMulti
     retrieval_chain = multiQuery() | config.getDB().as_retriever().map() | getUniqueDocs
     docs = retrieval_chain.invoke({"question":queryInput})
-    len(docs)
     return docs
 
-def queryMulti(queryInput): 
-    # Retrieve
+
+def hydeDocGeneration():
+    prompt_hyde = ChatPromptTemplate.from_template(config.hyde_template)
+
+    return (prompt_hyde | config.getLLM() | StrOutputParser())
+
+def hydeRetrieval(queryInput): 
+    hydeChain = hydeDocGeneration() | config.getDB().as_retriever()
+    return hydeChain.invoke({"question":queryInput})
+
+
+def queryMulti(queryInput, history): 
     results = retrievalChain(queryInput)
-    prompt = ChatPromptTemplate.from_template(config.promptTemplate)
+    
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", config.promptTemplate),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{question}"),
+    ])
 
     ragChain = prompt | config.getLLM() | StrOutputParser()    
 
-    response = ragChain.invoke({"context": results, "question": queryInput})
+    response = ragChain.invoke({"context": results, "question": queryInput, "chat_history": history})
     sources = [doc.metadata.get("id", None) for doc in results]
     return {"response": response, "sources": sources}
 
-def queryNative(queryInput):
-    db = config.getDB()
+def queryHyde(queryInput, history): 
+    results = hydeRetrieval(queryInput)
 
-    #Retrieve
-    results = db.similarity_search_with_score(queryInput, config.k)
-    db.as_retriever()
-    
-    #Augmention
-    context = "\n---\n".join([doc.page_content for doc, _score in results])
-    sources = [doc.metadata.get("id", None) for doc, _score in results]
-    promtTemplate = ChatPromptTemplate.from_template(config.promptTemplate)
-    prompt = promtTemplate.format(context=context, question=queryInput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", config.contextPromptTemplate),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{question}"),
+    ])
 
-    #Generation
-    response = config.getLLM().invoke(prompt)
+    ragChain = (prompt | config.getLLM() | StrOutputParser())
 
-    native_rag = ()
-
+    response = ragChain.invoke({"context": results, "question": queryInput, "chat_history": history})
+    sources = [doc.metadata.get("id", None) for doc in results]
     return {"response": response, "sources": sources}
+
+def querySimple(queryInput, history):
+    results = config.getDB().similarity_search_with_score(queryInput, config.k)
+
+    prompt = ChatPromptTemplate.from_messages([
+            ("system", config.promptTemplate),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{question}"),
+        ])
+        
+    ragChain = (prompt | config.getLLM() | StrOutputParser())
+
+    response = ragChain.invoke({"context": results, "question": queryInput, "chat_history": history})
+    sources = [doc.metadata.get("id", None) for doc, _score in results]
+    return {"response": response, "sources": sources}
+

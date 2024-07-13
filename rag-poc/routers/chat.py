@@ -28,10 +28,11 @@ async def chat(chat: AddMessage, db: Session = Depends(get_db), user: User = Dep
     else:
         activeChat = db.query(ChatModel).filter(ChatModel.id == chat.chatID).first()
     if activeChat:
+        msgKontext = db.query(MessageModel).filter(MessageModel.chatID == activeChat.id).all()
         newUserMessage = MessageModel(message=chat.message, sources='', chatID=activeChat.id, author="user")
         db.add(newUserMessage)
         db.commit()
-        msg = await queryEndpoint(chat.message)
+        msg = await queryEndpoint(chat.message, msgKontext)
         message = msg['response']
         sources = str(msg['sources'])
         newMessage = MessageModel(message=message, sources=sources, chatID=activeChat.id, author="system")
@@ -83,6 +84,7 @@ async def deleteChat(chatID: int, db: Session = Depends(get_db), user: User = De
     return {"message": "Chat erfolgreich entfernt"}
 
 @router.post("/query")
-async def queryEndpoint(msg: str, user: User = Depends(getCurrentUser)):
-    response = rag.queryMulti(msg)
+async def queryEndpoint(msg: str, msgKontext, user: User = Depends(getCurrentUser)):
+    kontext = [{"role": m.author, "content": m.message} for m in msgKontext]
+    response = rag.queryMulti(msg, kontext)
     return response
