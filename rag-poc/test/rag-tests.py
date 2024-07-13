@@ -1,18 +1,11 @@
-import config
 from core.rag import query
+import config
+ 
 
-
-def testMonopoly():
+def test1():
     assert validate(
-        question="How much total money does a player start with in Monopoly? (Answer with the number only)",
-        expected="$1500",
-    )
-
-
-def testTicketToRide():
-    assert validate(
-        question="How many points does the longest continuous train get in Ticket to Ride? (Answer with the number only)",
-        expected="10 points",
+        question="Wie kann ich einen Vertrag kündigen?",
+        expected="Sie können Ihren Vertrag bei beitragspflichtigen Versicherungen jederzeit zum Schluss der laufenden Versicherungsperiode kündigen. Bei beitragsfreien Versicherungen können Sie den Vertrag zu jedem Monatsende in Textform (z. B. Brief, Fax, E-Mail) kündigen. Eine Kündigung nach Rentenbeginn ist jedoch nicht möglich.",
     )
 
 
