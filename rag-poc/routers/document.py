@@ -43,14 +43,6 @@ async def loadConfluence(): #user: User = Depends(getCurrentUser)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Fehler beim Laden der Confluence-Daten: {str(e)}")
 
-@router.get("/reset")
-async def resetDBs(): #user: User = Depends(getCurrentUser)
-    try:
-        data = indexing.laodConfluence()
-        return {"confluenceData": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Fehler beim Laden der Confluence-Daten: {str(e)}")
-
 @router.get("/documents")
 async def getDocuments(db: Session = Depends(get_db), user: User = Depends(getCurrentUser)):
     try:
