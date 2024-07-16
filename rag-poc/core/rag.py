@@ -53,7 +53,7 @@ def queryHyde(queryInput, history):
     results = hydeRetrieval(queryInput)
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", config.contextPromptTemplate),
+        ("system", config.hyde_template),
         MessagesPlaceholder("chat_history"),
         ("human", "{question}"),
     ])

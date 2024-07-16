@@ -16,8 +16,14 @@
         </div>
         <div class="param">
           <label for="vektor-DB">Vektor-DB:</label>
-          <select v-model="this.config.vectorDB" id="vecttor-db" required>
+          <select v-model="this.config.vectorDB" id="vektor-db" required>
             <option v-for="option3 in this.config.vectorDBOptions" :key="option3" :value="option3">{{ option3 }}</option>
+          </select>
+        </div>
+        <div class="param">
+          <label for="rag-method">rag-Methode:</label>
+          <select v-model="this.config.activeRAG" id="rag-method" required>
+            <option v-for="option4 in this.config.RAGOptOptions" :key="option4" :value="option4">{{ option4 }}</option>
           </select>
         </div>
       </div>
@@ -26,22 +32,24 @@
         <textarea  v-model="this.config.promptTemplate" id="prompt" required />
       </div>
       <div class="param">
-        <label for="test-Prompt">Test-Promopt:</label>
-        <textarea  v-model="this.config.testPrompt" id="test-prompt" required />
+        <label for="multiQuery_template">MultiQuery-Prompt:</label>
+        <textarea  v-model="this.config.multiQuery_template" id="multiQuery_template" required />
       </div>
       <div class="param">
-        <label for="sqldburl">SQL-DB:</label>
-        <input v-model="this.config.sqldburl" id="sqldburl" type="text" required />
-      </div>
-      <div class="param">
-        <label for="dataDump">Daten:</label>
-        <input v-model="this.config.dataDump" id="dataDump" type="input" required />
+        <label for="hyde_template">HyDE-Prompt:</label>
+        <textarea  v-model="this.config.hyde_template" id="hyde_template" required />
       </div>
       <div class="paramWrapper">
         <div class="param">
-          <label for="k">Suchparameter(k-val)</label>
+          <label for="temperature">LLM-Kreativität</label>
+          <input v-model="this.config.temperature" id="temperature" type="number" required />
+        </div>
+        <div class="param">
+          <label for="k">Chunk-Anzahl bei Suche</label>
           <input v-model="this.config.k" id="k" type="number" required />
         </div>
+      </div>
+      <div class="paramWrapper">
         <div class="param">
           <label for="chunkSize">Chunk-Größe:</label>
           <input v-model="this.config.chunk_size" id="chunkSize" type="number" required />
@@ -64,20 +72,21 @@ export default {
   data() {
     return {
       config: {
-        llmOptions: ["openai","mistral"],
-        embeddingModelOptions: ["openai", "cohore"],
-        vectorDBOptions: ["chroma", "pinecone"],
+        llmOptions: ["openai", "mistral", "llama"],
+        embeddingModelOptions: ["openai", "cohore", "local"],
+        vectorDBOptions: ["chroma"],
+        RAGOptOptions: ["simple", "hyde", "multi"],
         llm: "openai",
-        embeddingModel: 'openai',
-        vectorDB: 'chroma',
+        embeddingModel: '',
+        vectorDB: '',
+        activeRAG: '',
         promptTemplate: '',
-        testPrompt: '',
-        sqldburl: '',
-        dataDump: '',
-        k: 3,
-        chunk_size: 800,
-        chunk_overlap: 80,
-        apiKey: ''
+        multiQuery_template: '',
+        hyde_template: '',
+        temperature: 0,
+        k: 0,
+        chunk_size: 0,
+        chunk_overlap: 0
       }
     }
   },

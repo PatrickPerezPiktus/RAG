@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from dbs.database import get_db, ChatModel, MessageModel, ChunkModel
 from routers.user import getCurrentUser, User
+import config
 from core import rag
 from fastapi import status
 
@@ -86,5 +87,9 @@ async def deleteChat(chatID: int, db: Session = Depends(get_db), user: User = De
 @router.post("/query")
 async def queryEndpoint(msg: str, msgKontext, user: User = Depends(getCurrentUser)):
     kontext = [{"role": m.author, "content": m.message} for m in msgKontext]
-    response = rag.queryMulti(msg, kontext)
-    return response
+    if config.activeRAG == "simple": 
+        return rag.querySimple(msg, kontext)
+    elif config.activeRAG == "multi":#
+        return rag.queryMulti(msg, kontext)
+    elif config.activeRAG == "hyde":
+        return rag.queryHyde(msg, kontext)

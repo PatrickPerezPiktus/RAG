@@ -11,17 +11,17 @@ import os
 import json
 import chromadb
 
-# local Data
-dataDump = "_raw_data"
+### .env vars 
+load_dotenv()
 
 # SQL-DB PATH 
-sqldburl = 'mysql+mysqlconnector://user:password@localhost:3306/ragdb' #db
+sqlUser = os.environ['SQL_USER']
+sqlPW = os.environ['SQL_PW']
+sqlServer = os.environ['SQL_SERVER']
+sqldburl = 'mysql+mysqlconnector://'+sqlUser+':'+sqlPW+'@'+sqlServer+':3306/ragdb' 
 
 # ANN-Search-Val (Anzahl der Elemente)
 k = 3
-
-### .env vars 
-load_dotenv()
 
 # JSON Web Token Key 
 jwt_secret_key = os.environ['JWT_SECRET_KEY']
@@ -60,7 +60,8 @@ splitter = dict(
 activeEmbedding = "openai"
 
 # Cohere
-cohere_embeddings_model = "" #CohereEmbeddings(cohere_api_key=os.environ['COHERE_API_KEY'])
+cohere_api_key=os.environ['COHERE_API_KEY']
+cohere_embeddings_model = '' #CohereEmbeddings(cohere_api_key)
 # OpenAI
 openai_embeddings_model = OpenAIEmbeddings()
 # Local
@@ -74,7 +75,7 @@ embeddingModelList = dict(
 embeddingsmodel = embeddingModelList[activeEmbedding]
 
 
-## LLM 
+### LLM 
 activeLLM = "openai"
 
 # OPENAI
@@ -84,7 +85,7 @@ openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=temperature)
 # Local Llama 
 llamaLLM = Ollama(model="llama3")
 # Local Mistral
-mistralLLM = "" #Ollama("mistral")
+mistralLLM = Ollama(model="mistral")
 
 llmList = dict(
     openai=openaiLLM,
@@ -95,23 +96,35 @@ def getLLM():
     return llmList[activeLLM]
 
 
-# VEKTOR-DATENBANK
+### VEKTOR-DATENBANK
 activeDB = "chroma"
 
 #Pinecone
 pinecone = ""#PineconeVectorStore.from_documents(docs, embeddings, index_name=index_name)
 # Chroma
 dbDirectory = "database"
-chroma_client = chromadb.HttpClient(host='localhost', port=8000) #host='chromadb'
-collection = chroma_client.get_or_create_collection(name="games")
+chromaServer = os.environ['CHROMA_SERVER']
+chroma_client = chromadb.HttpClient(host=chromaServer, port=8000) 
 chroma = Chroma(persist_directory=dbDirectory, embedding_function=embeddingsmodel, client=chroma_client)
 
 dbList = dict(
     chroma=chroma, 
-    pinecone=pinecone 
+    #pinecone=pinecone 
 )
 def getDB():
     return dbList[activeDB]
+
+
+### RAG-Optimierung 
+
+activeRAG = "simple"
+RAGOptList = dict(
+    simple="simple",
+    hyde="hyde",
+    multi="multi"
+)
+def getRAGOpt():
+    return RAGOptList[activeRAG]
 
 
 ### PROMPTS 
@@ -133,14 +146,18 @@ Abschnitt:"""
 promptTemplate = """
 Du bist ein Assistent zur Beantwortung von Fragen im Bezug auf Versicherungsbedingungen. 
 Damit du genaue Informationen geben kannst, werden dir Teile aus Dokumenten zur verfügung gestellt. 
-Dieser Kontext wird aus Teilstücken von Dokumenten zusammengesetzt.
-Beantworte die Frage auf der Grundlage des folgenden Kontextes:
+Dafür wird die Nutzeranfrage verabeitet und eine Änlichkeitssuche in den Dokumenten gemacht. 
+Diese Dokumente beinhalten die Bedingungen unterschiedlicher Produkte und unterschiedlicher Generationen. 
+
+Teile der echten Dokumente:
 
 {context}
 
 ---
 
 Frage: {question}
+
+Antworte genau und nutze dafür die Teile der Dokumente, halte dich ausreichend kurz
 """
 
 # Test-Prompt 
@@ -158,41 +175,40 @@ def getParameters():
         "llm": activeLLM,
         "vectorDB": activeDB,
         "embeddingModel": activeEmbedding,
-        "sqldburl": sqldburl,
-        "dataDump": dataDump,
-        "k": k,
-        "chunk_size":splitter["chunk_size"],
-        "chunk_overlap":splitter["chunk_overlap"],
-        "promptTemplate": promptTemplate.strip(),
-        "testPrompt": testPrompt.strip(),
+        "activeRAG": activeRAG,
         "llmOptions": list(llmList.keys()),
         "embeddingModelOptions": list(embeddingModelList.keys()),
         "vectorDBOptions": list(dbList.keys()),
+        "RAGOptOptions": list(RAGOptList.keys()),
+
+        "k": k,
+        "temperature": temperature,
+        "chunk_size":splitter["chunk_size"],
+        "chunk_overlap":splitter["chunk_overlap"],
+
+        "promptTemplate": promptTemplate.strip(),
+        "multiQuery_template": multiQuery_template.strip(),
+        "hyde_template": hyde_template.strip(),
     }
     return params
 
-class ConfigData(BaseModel):
-    llm: int
-    vectorDB: int
-    embeddingModel: int
-    sqldburl: str
-    dataDump: str
-    k: int
-    chunk_overlap: int
-    chunk_size: int
-    promptTemplate: str
-    testPrompt: str
-
 def updateParameters(params):
-    global sqldburl, dataDump, k, splitter, promptTemplate, testPrompt, activeDB, activeEmbedding, activeLLM
+    global k, splitter, temperature, promptTemplate, multiQuery_template, hyde_template, activeDB, activeEmbedding, activeLLM, activeRAG, embeddingsmodel, chroma, openaiLLM
     
     activeDB = params.vectorDB
     activeLLM = params.llm
     activeEmbedding = params.embeddingModel
-    sqldburl = params.sqldburl
-    dataDump = params.dataDump
+    activeRAG = params.activeRAG
+
     k = params.k
+    temperature = params.temperature
     splitter["chunk_overlap"] = params.chunk_overlap
     splitter["chunk_size"] = params.chunk_size
+
     promptTemplate = params.promptTemplate
-    testPrompt = params.testPrompt
+    multiQuery_template = params.multiQuery_template
+    hyde_template = params.hyde_template
+
+    embeddingsmodel = embeddingModelList[activeEmbedding]
+    chroma = Chroma(persist_directory=dbDirectory, embedding_function=embeddingsmodel, client=chroma_client)
+    openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=temperature)
