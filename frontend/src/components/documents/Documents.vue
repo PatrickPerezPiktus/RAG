@@ -1,6 +1,12 @@
 <template>
   <div class="togleData">
     <button @click="this.show = !this.show">Datenansicht wechseln</button>
+      <input type="file" id="fileInput" @change="onFileChange" />
+      <label for="fileInput" class="custom-file-upload">
+        Datei auswählen
+      </label>
+      <span class="sel-file" v-if="this.selectedFile">{{ this.selectedFile.name }}</span>
+      <button v-if="this.selectedFile" @click="uploadFile">Upload</button>
   </div>
   <div v-if="!show" class="database">    
     <div class="header-row">
@@ -12,14 +18,6 @@
             :id='element.id'
             :name='element.name'
             :chunks='element.chunks'/>
-    <div class="file-upload">
-        <input type="file" id="fileInput" @change="onFileChange" />
-        <label for="fileInput" class="custom-file-upload">
-          Datei auswählen
-        </label>
-        <span v-if="this.selectedFile">{{ this.selectedFile.name }}</span>
-        <button @click="uploadFile">Upload</button>
-      </div>
   </div>
   <Plot v-if="show"></Plot>
 </template>
@@ -117,6 +115,7 @@ export default {
   min-width: fit-content;
   border: none;
   cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 #fileInput {
@@ -138,6 +137,12 @@ export default {
 .togleData {
   margin: 0 auto; 
   margin-top: 1em;
-  width: 800px;
+  padding-left: 2em;
+  display: flex;
+  flex-direction: row;
+}
+
+.sel-file {
+  align-self: center;
 }
 </style>
