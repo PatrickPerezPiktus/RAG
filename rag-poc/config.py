@@ -80,8 +80,9 @@ activeLLM = "openai"
 
 # OPENAI
 temperature=0
+gptmodel="gpt-3.5-turbo-16k" #"GPT-4o-2024-05-13"
 openai.api_key = os.environ['OPENAI_API_KEY']
-openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=temperature)
+openaiLLM = ChatOpenAI(model=gptmodel, temperature=temperature)
 # Local Llama 
 llamaLLM = Ollama(model="llama3")
 # Local Mistral
@@ -165,7 +166,7 @@ testPrompt = """
 Erwartete Antwort: {expected}
 Wirkliche Antwort: {actual}
 ---
-(Antworte mit 'true' oder 'false') Stimmt die wirkliche Antwort mit der erwarteten Antwort überein? 
+(Antworte mit 'true' oder 'false') Ist die wirkliche Antwort und die erwartete Antwort inhaltlich gleich? 
 """
 
 ### Konfuguration bereitstellen: 
@@ -211,4 +212,4 @@ def updateParameters(params):
 
     embeddingsmodel = embeddingModelList[activeEmbedding]
     chroma = Chroma(persist_directory=dbDirectory, embedding_function=embeddingsmodel, client=chroma_client)
-    openaiLLM = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=temperature)
+    openaiLLM = ChatOpenAI(model=gptmodel, temperature=temperature) 
