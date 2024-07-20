@@ -4,5 +4,7 @@ rag-poc/__pycache__/
 rag-poc/dbs/__pycache__/
 rag-poc/core/__pycache__/
 rag-poc/routers/__pycache__/
+rag-poc/test/__pycache__/
+rag-poc/test/.pytest_cache/
 rag-poc/.env
 rag-poc/_raw_data/
