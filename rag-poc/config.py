@@ -80,7 +80,7 @@ activeLLM = "openai"
 
 # OPENAI
 temperature=0
-gptmodel="gpt-3.5-turbo-16k" #"GPT-4o-2024-05-13"
+gptmodel="gpt-3.5-turbo-16k"
 openai.api_key = os.environ['OPENAI_API_KEY']
 openaiLLM = ChatOpenAI(model=gptmodel, temperature=temperature)
 # Local Llama 
