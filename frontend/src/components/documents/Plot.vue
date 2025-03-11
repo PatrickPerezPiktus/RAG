@@ -20,7 +20,7 @@
 
 <script>
 import EventBus from '../../eventBus';
-import Plotly from 'plotly.js-dist-min'
+import Plotly from 'plotly.js-dist-min';
 import axios from '@/axios';
 import { mapGetters, mapActions } from 'vuex';
 import ChunkRow from '../utils/ChunkRow.vue';
