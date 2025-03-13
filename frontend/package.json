@@ -16,7 +16,7 @@
     "mitt": "^3.0.1",
     "vue": "^3.4.21",
     "vuex": "^4.1.0",
-    "plotly.js-dist-min": "^3.0.1"
+    "plotly.js-dist": "^3.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
