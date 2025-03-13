@@ -89,7 +89,7 @@ async def queryEndpoint(msg: str, msgKontext, user: User = Depends(getCurrentUse
     kontext = [{"role": m.author, "content": m.message} for m in msgKontext]
     if config.activeRAG == "simple": 
         return rag.querySimple(msg, kontext)
-    elif config.activeRAG == "multi":#
+    elif config.activeRAG == "multi":
         return rag.queryMulti(msg, kontext)
     elif config.activeRAG == "hyde":
         return rag.queryHyde(msg, kontext)
