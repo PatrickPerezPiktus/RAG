@@ -27,7 +27,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpw
   
   chromadb:
-    image: chromadb/chroma:0.6.4.dev226
+    image: chromadb/chroma:latest
     ports:
       - "8000:8000"
     networks:
